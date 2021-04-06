@@ -10,9 +10,9 @@ if ARGV.empty?
 end
 
 game = ARGV.shift
-search = Nokogiri::HTML(open("https://duckduckgo.com/html?q=site%3Ahowlongtobeat.com+#{CGI.escape(game)}"))
+search = Nokogiri::HTML(URI.open("https://duckduckgo.com/html?q=site%3Ahowlongtobeat.com+#{CGI.escape(game)}"))
 hltb_url = CGI.unescape search.css('.result__title').first.to_s.match(/(https%3A%2F%2Fhowlongtobeat.com%2Fgame.php%3Fid%3D\d+)"/)[1]
-page = Nokogiri::HTML(open(hltb_url))
+page = Nokogiri::HTML(URI.open(hltb_url))
 displayed_game = page.css('.profile_header').text.strip
 times = page.css('.game_times').map { |e| e.text.gsub('Hours','').gsub('½','').split("\n").map(&:strip).reject(&:empty?) }.flatten.map(&:strip).select { |e| e.to_i.to_s == e }.map(&:to_i)
 hours = { main: times[0], plus_extras: times[1], completionist: times[2] }
