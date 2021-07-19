@@ -1,16 +1,23 @@
 #!/usr/bin/env ruby
 
+# frozen_string_literal: true
+
 require 'uri'
 require 'net/http'
 require 'net/https'
-require 'nokogiri'
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'nokogiri'
+end
 
 class HLTB
-  URL = 'https://howlongtobeat.com/search_results?page=1'.freeze
+  URL = 'https://howlongtobeat.com/search_results?page=1'
 
   def initialize(game)
     @game = game
-	end
+  end
 
   def response
     @response ||= https.request post_request
@@ -38,30 +45,31 @@ class HLTB
 
   def headers
     {
-      'Accept' => '*/*',
-      #'Accept-Encoding' => 'gzip, deflate, br',
+      'Accept'       => '*/*',
       'Content-Type' => 'application/x-www-form-urlencoded',
-      'Origin' => 'https://howlongtobeat.com',
-      'Referer' => 'https://howlongtobeat.com/',
-      'User-Agent' => user_agent
+      'Origin'       => 'https://howlongtobeat.com',
+      'Referer'      => 'https://howlongtobeat.com/',
+      'User-Agent'   => user_agent
     }
   end
 
+  # rubocop:disable Layout/LineLength
   def user_agent
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Brave Chrome/91.0.4472.124 Safari/537.36'
   end
+  # rubocop:enable Layout/LineLength
 
   def form_data
     {
       queryString: game,
-      t: 'games',
-      sorthead: 'popular',
-      sortd: 'Normal Order',
-      plat: nil,
+      t:           'games',
+      sorthead:    'popular',
+      sortd:       'Normal Order',
+      plat:        nil,
       length_type: 'main',
-      length_min: nil,
-      length_max: nil,
-      detail: nil
+      length_min:  nil,
+      length_max:  nil,
+      detail:      nil
     }
   end
 end
@@ -81,11 +89,12 @@ class GameLookup
 
   def matches
     return 0 unless valid?
+
     games.size
   end
 
   def details
-    games.map { |d| extract d }
+    games.map {|d| extract d }
   end
 
   private
@@ -94,7 +103,7 @@ class GameLookup
 
   def extract(data)
     {
-      path: data.css('a').first.attributes['href'].value,
+      path:  data.css('a').first.attributes['href'].value,
       title: data.css('a').first.attributes['title'].value,
       times: times(data)
     }
@@ -103,11 +112,13 @@ class GameLookup
   def times_section(data)
     return '.search_list_tidbit' if data.css('.search_list_tidbit').any?
     return '.search_list_tidbit_long' if data.css('.search_list_tidbit_long').any?
+
     nil
   end
 
   def times(data)
     return {} unless times_section(data)
+
     time_section = data.css(times_section(data)).css('.center')
     types.each_with_object({}) do |type, hash|
       hash[type] = sanitize(time_section.shift.children.text) if time_section.any?
@@ -115,12 +126,12 @@ class GameLookup
   end
 
   def types
-    %i(main extra complete)
+    %i[main extra complete]
   end
 
   def sanitize(string)
-    string.gsub('Hours', '').gsub('½','.5').strip.to_f.tap do |hours|
-      hours = hours.round if hours.to_i == hours
+    string.gsub('Hours', '').gsub('½', '.5').strip.to_f.tap do |hours|
+      hours.round if hours.to_i == hours
     end
   end
 
@@ -134,6 +145,7 @@ class GameLookup
 
   def page
     return unless valid?
+
     @page ||= Nokogiri::HTML(response.body)
   end
 end
@@ -150,7 +162,7 @@ unless lookup.valid?
 end
 
 lookup.details.each_with_index do |game, i|
-  puts "#{i+1}: #{game[:title]}"
+  puts "#{i + 1}: #{game[:title]}"
   puts game[:path]
   game[:times].each do |type, hours|
     puts "#{type.to_s.capitalize}: #{hours} hours"
