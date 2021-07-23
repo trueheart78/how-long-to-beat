@@ -9,6 +9,7 @@ require 'bundler/inline'
 
 gemfile do
   source 'https://rubygems.org'
+  gem 'colorize'
   gem 'nokogiri'
 end
 
@@ -163,8 +164,8 @@ unless lookup.valid?
 end
 
 lookup.details.each_with_index do |game, i|
-  puts "#{i + 1}: #{game[:title]}"
-  puts game[:path]
+  puts "#{i + 1}: #{game[:title]}".light_blue
+  puts "Link: https://howlongtobeat.com/#{game[:path]}".cyan
   game[:times].each do |type, hours|
     puts "#{type.to_s.capitalize}: #{hours} hours"
   end
