@@ -155,7 +155,8 @@ if ARGV.empty?
   exit 1
 end
 
-lookup = GameLookup.new(ARGV.first)
+game_name = ARGV.join(' ')
+lookup = GameLookup.new(game_name)
 unless lookup.valid?
   puts "#{lookup.code} response code received"
   exit 2

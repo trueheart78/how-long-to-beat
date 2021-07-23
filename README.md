@@ -20,10 +20,11 @@ completionist: 172 hours
 
 ### `hltb-direct.rb`
 
-This is the refactored version to return multiple results.
+This is the refactored version to return multiple results for a single game. Note that quotes
+around the game entry are not required.
 
 ```
-$ ./hltb-direct.rb "witcher 3"
+$ ./hltb-direct.rb witcher 3
 1: The Witcher 3 Wild Hunt
 game?id=10270
 Main: 51.5 hours
