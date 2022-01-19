@@ -94,8 +94,8 @@ class GameLookup
     games.size
   end
 
-  def details
-    games.map {|d| extract d }
+  def games
+    details.map {|d| extract d }
   end
 
   private
@@ -140,8 +140,8 @@ class GameLookup
     @response ||= HLTB.new(game).response
   end
 
-  def games
-    @games ||= page.css('.search_list_details')
+  def details
+    @details ||= page.css('.search_list_details')
   end
 
   def page
@@ -163,7 +163,7 @@ unless lookup.valid?
   exit 2
 end
 
-lookup.details.each_with_index do |game, i|
+lookup.games.each_with_index do |game, i|
   puts "#{i + 1}: #{game[:title]}".light_blue
   puts "Link: https://howlongtobeat.com/#{game[:path]}".cyan
   game[:times].each do |type, hours|
