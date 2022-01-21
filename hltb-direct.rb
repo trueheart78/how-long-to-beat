@@ -154,8 +154,8 @@ class GameLookup
     # convert to integer if there is no value after the decimal
     time[:duration] = time[:duration].round if time[:duration].to_i == time[:duration]
 
-    # pluralize units if unit > 1
-    time[:units] += 's' if time[:duration] > 1
+    # pluralize units if duration != 1
+    time[:units] += 's' if time[:duration] != 1
 
     time
   end
