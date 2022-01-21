@@ -129,7 +129,7 @@ class GameLookup
 
     time_section = data.css(times_section(data)).css('.center')
     types.each_with_object({}) do |type, hash|
-      hash[type] = sanitize(time_section.shift.children.text) if time_section.any?
+      hash[type] = string_to_time(time_section.shift.children.text) if time_section.any?
     end
   end
 
@@ -137,10 +137,27 @@ class GameLookup
     %i[main extra complete]
   end
 
-  def sanitize(string)
-    string.gsub('Hours', '').gsub('½', '.5').strip.to_f.tap do |hours|
-      hours.round if hours.to_i == hours
+  def string_to_time(string)
+    if string.include? 'Mins'
+      extract_time string, 'Mins'
+    else
+      extract_time string, 'Hours'
     end
+  end
+
+  def extract_time(string, unit_string)
+    time = { duration: 1.0, units: '' }
+
+    time[:units] = unit_string.include?('Mins') ? 'minute' : 'hour'
+    time[:duration] = string.gsub(unit_string, '').gsub('½', '.5').strip.to_f
+
+    # convert to integer if there is no value after the decimal
+    time[:duration] = time[:duration].round if time[:duration].to_i == time[:duration]
+
+    # pluralize units if unit > 1
+    time[:units] += 's' if time[:duration] > 1
+
+    time
   end
 
   def response
@@ -173,8 +190,8 @@ end
 lookup.games.each_with_index do |game, i|
   puts "#{i + 1}: #{game[:title]}".light_blue
   puts "Link: https://howlongtobeat.com/#{game[:path]}".cyan
-  game[:times].each do |type, hours|
-    puts "#{type.to_s.capitalize}: #{hours} hours"
+  game[:times].each do |type, time|
+    puts "#{type.to_s.capitalize}: #{time[:duration]} #{time[:units]}"
   end
-  puts ''
+  puts '' unless lookup.games.size == i+1
 end
